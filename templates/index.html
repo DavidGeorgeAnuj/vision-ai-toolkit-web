@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Recognition Web App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+
+        .container {
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            margin-top: 50px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .btn {
+            display: block;
+            width: 80%;
+            padding: 15px;
+            margin: 10px auto;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background: #007BFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background: #0056b3;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #videoFeed {
+            width: 100%;
+            max-width: 600px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            margin-top: 20px;
+        }
+
+        #uploadedVideo {
+            display: none;
+            margin-top: 20px;
+        }
+
+        #videoUploadLabel {
+            display: inline-block;
+            padding: 12px 20px;
+            width: 80%;
+            background: #007BFF;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        #videoUploadLabel:hover {
+            background: #0056b3;
+        }
+
+        #videoUpload {
+            display: none;
+        }
+
+        #textUploadLabel {
+            display: inline-block;
+            padding: 12px 20px;
+            width: 80%;
+            background: #007BFF;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-align: center;
+        }
+
+        #textUploadLabel:hover {
+            background: #0056b3;
+        }
+
+        #textImageUpload {
+            display: none;
+        }
+
+
+        #galleryContainer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .gallery-folder {
+            margin: 10px;
+            padding: 10px;
+            background: #ddd;
+            border-radius: 5px;
+            width: 200px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .gallery-folder:hover {
+            background: #ccc;
+        }
+
+        .gallery-folder img {
+            width: 100%;
+            border-radius: 5px;
+        }
+
+        #faceUploadLabel {
+            display: inline-block;
+            padding: 12px 20px;
+            background: #007BFF;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        #faceUploadLabel:hover {
+            background: #0056b3;
+        }
+
+        #faceUpload {
+            display: none;
+        }
+
+        .image-gallery img {
+            width: 150px;
+            margin: 5px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Main Menu -->
+    <div class="container" id="mainMenu">
+        <h1>Select an Option</h1>
+        <button class="btn" onclick="showObjectRecognition()">Object Recognition</button>
+        <button class="btn" onclick="showTextRecognition()">Text Recognition</button>
+        <button class="btn" onclick="showFaceRecognition()">Face Recognition</button>
+    </div>
+
+    <!-- Object Recognition Menu -->
+    <div class="container hidden" id="objectRecognitionMenu">
+        <h1>Object Recognition</h1>
+        <label id="videoUploadLabel" for="videoUpload">Upload Video</label>
+        <button class="btn" onclick="startRealTimeDetection()">Start Real-Time Detection</button>
+        <button class="btn" onclick="stopDetection()">Stop Detection</button>
+        <input type="file" id="videoUpload" accept="video/*" onchange="uploadVideo()">
+        <button class="btn" onclick="goBack()">Back</button>
+
+        <div id="videoContainer" class="hidden">
+            <h2>Live Object Detection</h2>
+            <img id="videoFeed" src="" alt="Live Feed">
+        </div>
+    </div>
+
+    <!-- Text Recognition Menu -->
+    <div class="container hidden" id="textRecognitionMenu">
+        <h1>Text Recognition</h1>
+
+        <label id="textUploadLabel" for="textImageUpload">Upload Image</label>
+        <input type="file" id="textImageUpload" accept="image/*" onchange="uploadTextImage()">
+
+        <button class="btn" onclick="goBack()">Back</button>
+
+        <div id="textImagePreviewContainer" class="hidden">
+            <h2>Uploaded Image</h2>
+            <img id="textImagePreview" src="" alt="Uploaded Image"
+                style="max-width: 100%; border-radius: 5px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); margin-top: 10px;">
+        </div>
+
+        <div id="textResultContainer" class="hidden">
+            <h2>Extracted Text</h2>
+            <p id="textResult"></p>
+        </div>
+    </div>
+
+    <!-- Face Recognition Menu -->
+    <div class="container hidden" id="faceRecognitionMenu">
+        <h1>Face Recognition</h1>
+        <label id="faceUploadLabel" for="faceUpload">Upload Image</label>
+        <input type="file" id="faceUpload" accept="image/*" onchange="uploadFaceImage()">
+        <button class="btn" onclick="goBack()">Back</button>
+
+        <!-- Main gallery view -->
+        <div id="galleryView">
+            <h2>Gallery</h2>
+            <div id="galleryContainer"></div>
+        </div>
+
+        <!-- Person-specific view -->
+        <div id="personView" class="hidden">
+            <button class="btn" onclick="showGallery()">Back to Gallery</button>
+            <h2 id="folderTitle"></h2>
+            <div class="image-gallery" id="personImages"></div>
+        </div>
+    </div>
+
+        <script>
+            function showTextRecognition() {
+                document.getElementById("mainMenu").classList.add("hidden");
+                document.getElementById("textRecognitionMenu").classList.remove("hidden");
+                document.getElementById("objectRecognitionMenu").classList.add("hidden");
+                document.getElementById("objectRecognitionMenu").classList.add("hidden");
+            }
+
+            function uploadTextImage() {
+                const file = document.getElementById("textImageUpload").files[0];
+                if (!file) return;
+
+                // Show image preview
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById("textImagePreview").src = e.target.result;
+                    document.getElementById("textImagePreviewContainer").classList.remove("hidden");
+                };
+                reader.readAsDataURL(file);
+
+                // Send image to server for text extraction
+                const formData = new FormData();
+                formData.append("file", file);
+
+                fetch("/text_recognition", {
+                    method: "POST",
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.text) {
+                            document.getElementById("textResult").innerText = data.text.join("\n");
+                            document.getElementById("textResultContainer").classList.remove("hidden");
+                        } else {
+                            document.getElementById("textResult").innerText = "Error extracting text.";
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
+            }
+
+            function goBack() {
+                document.getElementById("mainMenu").classList.remove("hidden");
+                document.getElementById("objectRecognitionMenu").classList.add("hidden");
+                document.getElementById("textRecognitionMenu").classList.add("hidden");
+                document.getElementById("faceRecognitionMenu").classList.add("hidden");
+            }
+            function showObjectRecognition() {
+                document.getElementById("mainMenu").classList.add("hidden");
+                document.getElementById("objectRecognitionMenu").classList.remove("hidden");
+                document.getElementById("textRecognitionMenu").classList.add("hidden");
+                document.getElementById("faceRecognitionMenu").classList.add("hidden");
+            }
+
+            function startRealTimeDetection() {
+                document.getElementById("videoContainer").classList.remove("hidden");
+                document.getElementById("videoFeed").src = "/realtime_detection";
+            }
+            function stopDetection() {
+                fetch("/stop_detection", { method: "POST" })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Detection stopped:", data);
+                        document.getElementById("videoFeed").src = "about:blank";  // Forcefully clear src
+                        setTimeout(() => {
+                            document.getElementById("videoFeed").src = "";
+                            document.getElementById("videoContainer").classList.add("hidden");
+                        }, 500); // Small delay ensures stream stops
+                    })
+                    .catch(error => console.error("Error:", error));
+            }
+
+
+            function uploadVideo() {
+                const file = document.getElementById("videoUpload").files[0];
+                if (!file) return;
+
+                const formData = new FormData();
+                formData.append("file", file);
+
+                fetch("/upload_video", {
+                    method: "POST",
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Video uploaded:", data);
+                        document.getElementById("videoFeed").src = "/video_feed";
+                        document.getElementById("videoContainer").classList.remove("hidden");
+                    })
+                    .catch(error => console.error("Error:", error));
+            }
+
+
+            function showFaceRecognition() {
+            document.getElementById("mainMenu").classList.add("hidden");
+            document.getElementById("faceRecognitionMenu").classList.remove("hidden");
+            loadGallery();
+        }
+
+        function uploadFaceImage() {
+            const file = document.getElementById("faceUpload").files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append("file", file);
+
+            fetch("/upload_face", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                loadGallery();
+            })
+            .catch(error => console.error("Error:", error));
+        }
+
+        function loadGallery() {
+            fetch("/get_gallery")
+            .then(response => response.json())
+            .then(data => {
+                const galleryContainer = document.getElementById("galleryContainer");
+                galleryContainer.innerHTML = "";
+                data.forEach(folder => {
+                    let folderDiv = document.createElement("div");
+                    folderDiv.classList.add("gallery-folder");
+                    folderDiv.innerHTML = `<h3>${folder.name}</h3>`;
+                    folderDiv.onclick = () => showPersonGallery(folder.name);
+                    galleryContainer.appendChild(folderDiv);
+                });
+            })
+            .catch(error => console.error("Error:", error));
+        }
+
+        function showPersonGallery(folderName) {
+            document.getElementById("galleryView").classList.add("hidden");
+            document.getElementById("personView").classList.remove("hidden");
+            document.getElementById("folderTitle").innerText = folderName;
+
+            fetch(`/get_person_images?folder=${folderName}`)
+            .then(response => response.json())
+            .then(data => {
+                const personImages = document.getElementById("personImages");
+                personImages.innerHTML = "";
+                data.images.forEach(imgSrc => {
+                    let imgElement = document.createElement("img");
+                    imgElement.src = imgSrc;
+                    personImages.appendChild(imgElement);
+                });
+            })
+            .catch(error => console.error("Error:", error));
+        }
+
+        function showGallery() {
+            document.getElementById("galleryView").classList.remove("hidden");
+            document.getElementById("personView").classList.add("hidden");
+        }
+
+        </script>
+
+</body>
+
+</html>
